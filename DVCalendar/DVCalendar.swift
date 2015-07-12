@@ -13,7 +13,6 @@ class DVCalendar: UIViewController {
     // MARK: - Properties
     
     weak var target: UIViewController!
-    weak var calendarTitleView: CalendarTitleView!
     weak var mainScrollView: UIScrollView!
     var subScrollViewArray = [UIScrollView]()
     var calendarTitleViewArray = [CalendarTitleView]()
@@ -61,42 +60,72 @@ class DVCalendar: UIViewController {
         view.backgroundColor = UIColor.clearColor()
     }
     
-    private func setupCalendarTitleViewWithDate(month: Int, year: Int) {
-        calendarTitleViewSize = CGSize(width: frame.width, height: frame.height/5)
-        let strongTitleView = CalendarTitleView(frame: CGRect(x: 0, y: 0, width: calendarTitleViewSize.width, height: calendarTitleViewSize.height), month: month, year: year)
-        view.addSubview(strongTitleView)
-        
-        view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Top, relatedBy: .Equal, toItem: view, attribute: .Top, multiplier: 1.0, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1.0, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1.0, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: calendarTitleViewSize.height))
-        
-        calendarTitleView = strongTitleView
-    }
     
     private func setupComponentsInsideCalendarView() {
         setupCalendarScrollView()
     }
     
     private func setupCalendarScrollView() {
-        todayDate = DVCalendarAPI.getTodayDate()
         //setupCalendarTitleViewWithDate(Int(todayDate["Month"]!), year: Int(todayDate["Year"]!))
         let strongMainScrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height))
         strongMainScrollView.contentSize = CGSizeMake(3 * self.view.bounds.width, self.view.bounds.height)
         strongMainScrollView.backgroundColor = UIColor.whiteColor()
         strongMainScrollView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
         strongMainScrollView.delegate = self
+        strongMainScrollView.pagingEnabled = true
         view.addSubview(strongMainScrollView)
         mainScrollView = strongMainScrollView
         
         for i in 0...2 {
-            
+            createSubScrollViewWithFrameWithCenterDate(CGRect(x: CGFloat(i) * strongMainScrollView.bounds.width, y: 0, width: strongMainScrollView.bounds.width, height: strongMainScrollView.bounds.height), index: i)
         }
     }
     
-    private func createSubScrollViewWithFrameWithCenterDate(frame: CGRect, month: Int, year: Int) {
+    private func createSubScrollViewWithFrameWithCenterDate(frame: CGRect, index: Int) {
+        let subScrollView = UIScrollView(frame: frame)
+        subScrollView.contentSize = CGSizeMake(mainScrollView.bounds.width, 3 * mainScrollView.bounds.height)
+        subScrollView.backgroundColor = UIColor.clearColor()
+        subScrollView.delegate = self
+        subScrollView.pagingEnabled = true
         
+        todayDate = DVCalendarAPI.getTodayDate()
+        
+        for j in 0...2 {
+            let subView = UIView(frame: CGRect(x: 0, y: CGFloat(j) * subScrollView.bounds.height, width: subScrollView.bounds.width, height: subScrollView.bounds.height))
+            subView.backgroundColor = UIColor.clearColor()
+            subView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+            
+            let month = Int(todayDate["Month"]!) + (index-1)
+            let year = Int(todayDate["Year"]!) + (j-1)
+            
+            let titleView = createCalendarTitleViewWithDate(month, year: year)
+            subView.addSubview(titleView)
+            
+            subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Top, relatedBy: .Equal, toItem: subView, attribute: .Top, multiplier: 1.0, constant: 0))
+            subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Left, relatedBy: .Equal, toItem: subView, attribute: .Left, multiplier: 1.0, constant: 0))
+            subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Right, relatedBy: .Equal, toItem: subView, attribute: .Right, multiplier: 1.0, constant: 0))
+            subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: calendarTitleViewSize.height))
+
+            
+            
+            subScrollView.addSubview(subView)
+        }
+        mainScrollView.addSubview(subScrollView)
     }
+    
+    private func createCalendarTitleViewWithDate(month: Int, year: Int) -> CalendarTitleView {
+        calendarTitleViewSize = CGSize(width: frame.width, height: frame.height/5)
+        let strongTitleView = CalendarTitleView(frame: CGRect(x: 0, y: 0, width: calendarTitleViewSize.width, height: calendarTitleViewSize.height), month: month, year: year)
+        //        view.addSubview(strongTitleView)
+        //
+//                view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Top, relatedBy: .Equal, toItem: view, attribute: .Top, multiplier: 1.0, constant: 0))
+//                view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1.0, constant: 0))
+//                view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1.0, constant: 0))
+//                view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: calendarTitleViewSize.height))
+        
+        return strongTitleView
+    }
+
     
     private func createSubViewWithFrameAndDate(subViewFrame subViewFrame: CGRect, month: Int, year: Int) -> UIView {
         let subView = UIView(frame: subViewFrame)

@@ -35,12 +35,26 @@ class MainVC: UIViewController {
         view.addConstraint(NSLayoutConstraint(item: cal.view, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1.0, constant: margin))
         view.addConstraint(NSLayoutConstraint(item: cal.view, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1.0, constant: -margin))
         view.addConstraint(NSLayoutConstraint(item: cal.view, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: deviceHeight/2))
-        
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+
+    
+    static func getDayOfWeek(day day: Int, month: Int, year: Int)->Int {
+        let today = "\(year)-\(month)-\(day)"
+        let formatter  = NSDateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        if let todayDate = formatter.dateFromString(today) {
+            let myCalendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+            let myComponents = myCalendar.components(NSCalendarUnit.Weekday, fromDate: todayDate)
+            let weekDay = myComponents.weekday
+            return weekDay
+        } else {
+            return 0
+        }
     }
     
 
