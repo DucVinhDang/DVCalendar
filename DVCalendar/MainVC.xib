@@ -14,7 +14,7 @@
             <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <animations/>
-            <color key="backgroundColor" red="0.36082839480601736" green="1" blue="0.62156663276266477" alpha="1" colorSpace="calibratedRGB"/>
+            <color key="backgroundColor" red="0.83761452879581155" green="0.83761452879581155" blue="0.83761452879581155" alpha="1" colorSpace="calibratedRGB"/>
         </view>
     </objects>
 </document>

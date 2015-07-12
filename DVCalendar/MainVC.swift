@@ -27,11 +27,11 @@ class MainVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let cal = DVCalendar(target: self, frame: CGRect(x: margin, y: margin, width: deviceWidth - (2*margin), height: deviceHeight/2))
+        let cal = DVCalendar(target: self, frame: CGRect(x: margin, y: margin*4, width: deviceWidth - (2*margin), height: deviceHeight/2))
         cal.show()
         calendar = cal
         
-        view.addConstraint(NSLayoutConstraint(item: cal.view, attribute: .Top, relatedBy: .Equal, toItem: view, attribute: .Top, multiplier: 1.0, constant: margin))
+        view.addConstraint(NSLayoutConstraint(item: cal.view, attribute: .Top, relatedBy: .Equal, toItem: view, attribute: .Top, multiplier: 1.0, constant: margin*4))
         view.addConstraint(NSLayoutConstraint(item: cal.view, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1.0, constant: margin))
         view.addConstraint(NSLayoutConstraint(item: cal.view, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1.0, constant: -margin))
         view.addConstraint(NSLayoutConstraint(item: cal.view, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: deviceHeight/2))

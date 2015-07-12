@@ -69,10 +69,13 @@ class DVCalendar: UIViewController {
         //setupCalendarTitleViewWithDate(Int(todayDate["Month"]!), year: Int(todayDate["Year"]!))
         let strongMainScrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height))
         strongMainScrollView.contentSize = CGSizeMake(3 * self.view.bounds.width, self.view.bounds.height)
-        strongMainScrollView.backgroundColor = UIColor.whiteColor()
+        strongMainScrollView.backgroundColor = UIColor.clearColor()
         strongMainScrollView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
         strongMainScrollView.delegate = self
         strongMainScrollView.pagingEnabled = true
+        strongMainScrollView.showsHorizontalScrollIndicator = false
+        strongMainScrollView.showsVerticalScrollIndicator = false
+        
         view.addSubview(strongMainScrollView)
         mainScrollView = strongMainScrollView
         
@@ -89,12 +92,14 @@ class DVCalendar: UIViewController {
         subScrollView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
         subScrollView.delegate = self
         subScrollView.pagingEnabled = true
+        subScrollView.showsHorizontalScrollIndicator = false
+        subScrollView.showsVerticalScrollIndicator = false
         
         todayDate = DVCalendarAPI.getTodayDate()
         
         for j in 0...2 {
             let subView = UIView(frame: CGRect(x: 0, y: CGFloat(j) * subScrollView.bounds.height, width: subScrollView.bounds.width, height: subScrollView.bounds.height))
-            subView.backgroundColor = UIColor.clearColor()
+            subView.backgroundColor = UIColor.whiteColor()
             subView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
             
             var month = Int(todayDate["Month"]!) + (index-1)
@@ -113,8 +118,10 @@ class DVCalendar: UIViewController {
             subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Right, relatedBy: .Equal, toItem: subView, attribute: .Right, multiplier: 1.0, constant: 0))
             subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: calendarTitleViewSize.height))
             
+            let margin: CGFloat = 10
             
-            let listDayView = createCalendarListDayViewWithFrameAndDate(frame: CGRect(x: 0, y: titleView.bounds.height, width: subScrollView.bounds.width, height: subScrollView.bounds.height), month: month, year: year)
+            let listDayView = createCalendarListDayViewWithFrameAndDate(frame: CGRect(x: 0, y: titleView.bounds.height, width: subScrollView.bounds.width, height: subScrollView.bounds.height - titleView.bounds.height - margin), month: month, year: year)
+            listDayView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
             subView.addSubview(listDayView)
             
             subScrollView.addSubview(subView)
@@ -146,6 +153,7 @@ class DVCalendar: UIViewController {
         let amountDayOfMonthBefore = DVCalendarAPI.getNumberDaysInMonthOfYear(month: Int(dateOfMonthBefore["Month"]!), year: Int(dateOfMonthBefore["Year"]!))
         let amountDayOfCurrentMonth = DVCalendarAPI.getNumberDaysInMonthOfYear(month: month, year: year)
         
+        let todayDate = DVCalendarAPI.getTodayDate()
         
         for i in 0...5 {
             for j in 0...6 {
@@ -168,9 +176,14 @@ class DVCalendar: UIViewController {
                         boxDay.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
                     }
                 }
-                textDay = "\(dayValue)"
                 
+                if dayValue == Int(todayDate["Day"]!) && month == Int(todayDate["Month"]!) && year == Int(todayDate["Year"]!) {
+                    boxDay.lineColor = UIColor.randomColor()
+                }
+                
+                textDay = "\(dayValue)"
                 boxDay.setTitle(textDay, forState: UIControlState.Normal)
+                boxDay.titleLabel?.font = UIFont(name: "Helvetica", size: 15)
                 listDayView.addSubview(boxDay)
             }
         }
@@ -189,6 +202,7 @@ class DVCalendar: UIViewController {
         target.addChildViewController(self)
         target.view.addSubview(view)
         self.didMoveToParentViewController(target)
+        
     }
     
     func hide() {
@@ -229,6 +243,9 @@ class CalendarTitleView: UIView {
     let lineWidth: CGFloat = 4
     let lineColor = UIColor.randomColor()
     
+    var monthLabelArray = [UILabel]()
+    let distanceBetweenMonthLabels: CGFloat = 10
+    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -266,9 +283,18 @@ class CalendarTitleView: UIView {
             subView.removeFromSuperview()
         }
         
+        for subLabel in monthLabelArray {
+            subLabel.removeFromSuperview()
+        }
+        
         let halfHeight = self.bounds.height/2
         
-        addMonthLabel()
+        for i in 0...2 {
+            let getDate = DVCalendarAPI.getDateAfterAddNewDate(currentDay: 1, currentMonth: monthValue, currentYear: 2000, numberDayToAdd: 0, numberMonthToAdd: i-1, numberYearToAdd: 0)
+            let currentMonthValue = Int(getDate["Month"]!)
+            addMonthLabelWithMonthValue(currentMonthValue, index: i)
+        }
+        
         addYearLabel()
         
         let dayArray = ["M", "T", "W", "T", "F", "S", "S"]
@@ -298,24 +324,26 @@ class CalendarTitleView: UIView {
         linePath.closePath()
     }
     
-    private func addMonthLabel() {
+    private func addMonthLabelWithMonthValue(value: Int, index: Int) {
         let halfHeight = self.bounds.height/2
         
-        let monthText: NSString = DVCalendarAPI.convertMonthValueToText(monthValue: monthValue) as NSString
-        let monthTextSize: CGSize = monthText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(monthTextFontSize)])
+        let monthText: NSString = DVCalendarAPI.convertMonthValueToText(monthValue: value) as NSString
+        let monthTextSize: CGSize = monthText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(monthTextFontSize+2)])
         
-        let monthLabel = UILabel(frame: CGRect(x: margin, y: margin, width: monthTextSize.width, height: halfHeight - margin))
+        var monthLabelOriginX: CGFloat = 0
+        for label in monthLabelArray {
+            monthLabelOriginX += label.bounds.width + distanceBetweenMonthLabels
+        }
+        
+        let monthLabel = UILabel(frame: CGRect(x: margin + monthLabelOriginX, y: margin, width: monthTextSize.width, height: halfHeight - margin))
         monthLabel.text = monthText as String
-        monthLabel.font = UIFont(name: "Futura", size: monthTextFontSize)
+        monthLabel.font = UIFont(name: "Helvetica", size: monthTextFontSize)
         monthLabel.textAlignment = NSTextAlignment.Center
+        
+        monthLabel.textColor = index == 1 ? UIColor.blackColor() : UIColor.lightGrayColor()
+        
         self.addSubview(monthLabel)
-        
-        monthLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        self.addConstraint(NSLayoutConstraint(item: monthLabel, attribute: .Left, relatedBy: .Equal, toItem: self, attribute: .Left, multiplier: 1.0, constant: margin))
-        self.addConstraint(NSLayoutConstraint(item: monthLabel, attribute: .Top, relatedBy: .Equal, toItem: self, attribute: .Top, multiplier: 1.0, constant: margin))
-        self.addConstraint(NSLayoutConstraint(item: monthLabel, attribute: .Width, relatedBy: .Equal, toItem: nil, attribute: .Width, multiplier: 1.0, constant: monthLabel.bounds.width))
-        self.addConstraint(NSLayoutConstraint(item: monthLabel, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: monthLabel.bounds.height))
+        monthLabelArray.append(monthLabel)
     }
     
     private func addYearLabel() {
@@ -336,6 +364,29 @@ class CalendarTitleView: UIView {
         self.addConstraint(NSLayoutConstraint(item: yearLabel, attribute: .Top, relatedBy: .Equal, toItem: self, attribute: .Top, multiplier: 1.0, constant: margin))
         self.addConstraint(NSLayoutConstraint(item: yearLabel, attribute: .Width, relatedBy: .Equal, toItem: nil, attribute: .Width, multiplier: 1.0, constant: yearLabel.bounds.width))
         self.addConstraint(NSLayoutConstraint(item: yearLabel, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: yearLabel.bounds.height))
+    }
+}
+
+//---------------------------------------------------------------//
+//--------------------------- BOXDAY ----------------------------//
+//---------------------------------------------------------------//
+
+class BoxDay: UIButton {
+    let lineWidth: CGFloat = 3
+    var lineColor = UIColor.clearColor() {
+        didSet { self.setNeedsDisplay() }
+    }
+    
+    override func drawRect(rect: CGRect) {
+        super.drawRect(rect)
+        
+        let linePath = UIBezierPath()
+        linePath.moveToPoint(CGPoint(x: lineWidth*2, y: self.bounds.height - lineWidth - lineWidth/2))
+        linePath.addLineToPoint(CGPoint(x: self.bounds.width - lineWidth*2, y: self.bounds.height - lineWidth - lineWidth/2))
+        lineColor.setStroke()
+        linePath.lineWidth = lineWidth
+        linePath.stroke()
+        linePath.closePath()
     }
 }
 
@@ -419,22 +470,7 @@ class DVCalendarAPI {
 
 }
 
-class BoxDay: UIButton {
-    let lineWidth: CGFloat = 4
-    let lineColor = UIColor.randomColor()
-    
-    override func drawRect(rect: CGRect) {
-        super.drawRect(rect)
-        
-        let linePath = UIBezierPath()
-        linePath.moveToPoint(CGPoint(x: lineWidth, y: self.bounds.height - lineWidth - lineWidth/2))
-        linePath.addLineToPoint(CGPoint(x: self.bounds.width - lineWidth - lineWidth/2, y: self.bounds.height - lineWidth - lineWidth/2))
-        lineColor.setStroke()
-        linePath.lineWidth = lineWidth
-        linePath.stroke()
-        linePath.closePath()
-    }
-}
+
 
 //---------------------------------------------------------------//
 //------------------------- EXTENSION ---------------------------//
