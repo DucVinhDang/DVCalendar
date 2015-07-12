@@ -8,12 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		A3E64D771B4FCD0B00D1AC46 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E64D761B4FCD0B00D1AC46 /* AppDelegate.swift */; };
-		A3E64D791B4FCD0B00D1AC46 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E64D781B4FCD0B00D1AC46 /* ViewController.swift */; };
-		A3E64D7C1B4FCD0B00D1AC46 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3E64D7A1B4FCD0B00D1AC46 /* Main.storyboard */; };
 		A3E64D7E1B4FCD0B00D1AC46 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A3E64D7D1B4FCD0B00D1AC46 /* Assets.xcassets */; };
 		A3E64D811B4FCD0B00D1AC46 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3E64D7F1B4FCD0B00D1AC46 /* LaunchScreen.storyboard */; };
 		A3E64D8C1B4FCD0C00D1AC46 /* DVCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E64D8B1B4FCD0C00D1AC46 /* DVCalendarTests.swift */; };
 		A3E64D971B4FCD0C00D1AC46 /* DVCalendarUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E64D961B4FCD0C00D1AC46 /* DVCalendarUITests.swift */; };
+		A3E64DA91B4FCD7800D1AC46 /* DVCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E64DA81B4FCD7800D1AC46 /* DVCalendar.swift */; };
+		A3E64DAC1B4FCD8600D1AC46 /* MainVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E64DAA1B4FCD8600D1AC46 /* MainVC.swift */; };
+		A3E64DAD1B4FCD8600D1AC46 /* MainVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3E64DAB1B4FCD8600D1AC46 /* MainVC.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,8 +37,6 @@
 /* Begin PBXFileReference section */
 		A3E64D731B4FCD0B00D1AC46 /* DVCalendar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DVCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A3E64D761B4FCD0B00D1AC46 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		A3E64D781B4FCD0B00D1AC46 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		A3E64D7B1B4FCD0B00D1AC46 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A3E64D7D1B4FCD0B00D1AC46 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A3E64D801B4FCD0B00D1AC46 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A3E64D821B4FCD0B00D1AC46 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -47,6 +46,9 @@
 		A3E64D921B4FCD0C00D1AC46 /* DVCalendarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DVCalendarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A3E64D961B4FCD0C00D1AC46 /* DVCalendarUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DVCalendarUITests.swift; sourceTree = "<group>"; };
 		A3E64D981B4FCD0C00D1AC46 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A3E64DA81B4FCD7800D1AC46 /* DVCalendar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DVCalendar.swift; sourceTree = "<group>"; };
+		A3E64DAA1B4FCD8600D1AC46 /* MainVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainVC.swift; sourceTree = "<group>"; };
+		A3E64DAB1B4FCD8600D1AC46 /* MainVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainVC.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,8 +100,10 @@
 			isa = PBXGroup;
 			children = (
 				A3E64D761B4FCD0B00D1AC46 /* AppDelegate.swift */,
-				A3E64D781B4FCD0B00D1AC46 /* ViewController.swift */,
-				A3E64D7A1B4FCD0B00D1AC46 /* Main.storyboard */,
+				A3E64DA71B4FCD6800D1AC46 /* Third Parties */,
+				A3E64DA61B4FCD5500D1AC46 /* Controllers */,
+				A3E64DA51B4FCD5100D1AC46 /* Views */,
+				A3E64DA41B4FCD4D00D1AC46 /* Models */,
 				A3E64D7D1B4FCD0B00D1AC46 /* Assets.xcassets */,
 				A3E64D7F1B4FCD0B00D1AC46 /* LaunchScreen.storyboard */,
 				A3E64D821B4FCD0B00D1AC46 /* Info.plist */,
@@ -123,6 +127,37 @@
 				A3E64D981B4FCD0C00D1AC46 /* Info.plist */,
 			);
 			path = DVCalendarUITests;
+			sourceTree = "<group>";
+		};
+		A3E64DA41B4FCD4D00D1AC46 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		A3E64DA51B4FCD5100D1AC46 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A3E64DAB1B4FCD8600D1AC46 /* MainVC.xib */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		A3E64DA61B4FCD5500D1AC46 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				A3E64DAA1B4FCD8600D1AC46 /* MainVC.swift */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		A3E64DA71B4FCD6800D1AC46 /* Third Parties */ = {
+			isa = PBXGroup;
+			children = (
+				A3E64DA81B4FCD7800D1AC46 /* DVCalendar.swift */,
+			);
+			name = "Third Parties";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -228,9 +263,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A3E64DAD1B4FCD8600D1AC46 /* MainVC.xib in Resources */,
 				A3E64D811B4FCD0B00D1AC46 /* LaunchScreen.storyboard in Resources */,
 				A3E64D7E1B4FCD0B00D1AC46 /* Assets.xcassets in Resources */,
-				A3E64D7C1B4FCD0B00D1AC46 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,8 +290,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A3E64D791B4FCD0B00D1AC46 /* ViewController.swift in Sources */,
 				A3E64D771B4FCD0B00D1AC46 /* AppDelegate.swift in Sources */,
+				A3E64DAC1B4FCD8600D1AC46 /* MainVC.swift in Sources */,
+				A3E64DA91B4FCD7800D1AC46 /* DVCalendar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,14 +328,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		A3E64D7A1B4FCD0B00D1AC46 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A3E64D7B1B4FCD0B00D1AC46 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		A3E64D7F1B4FCD0B00D1AC46 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
