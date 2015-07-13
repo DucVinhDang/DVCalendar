@@ -8,11 +8,6 @@
 
 import UIKit
 
-@objc protocol DVCalendarForTitleViewDelegate {
-    func didChangeDate(month: Int, year: Int)
-}
-
-
 class DVCalendar: UIViewController {
     
     // MARK: - Properties
@@ -29,7 +24,6 @@ class DVCalendar: UIViewController {
     var todayDate: [String:Int]!
     var calendarTitleViewSize: CGSize!
     
-    weak var titleViewDelegate: DVCalendarForTitleViewDelegate!
     
     
     // MARK: - Init methods
@@ -83,8 +77,6 @@ class DVCalendar: UIViewController {
         view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1.0, constant: 0))
         view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1.0, constant: 0))
         view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: calendarTitleViewSize.height))
-        
-        titleViewDelegate = strongTitleView
         
         titleView = strongTitleView
     }
@@ -209,12 +201,6 @@ class DVCalendar: UIViewController {
             }
         }
         return listDayView
-    }
-
-    
-    private func createSubViewWithFrameAndDate(subViewFrame subViewFrame: CGRect, month: Int, year: Int) -> UIView {
-        let subView = UIView(frame: subViewFrame)
-        return subView
     }
     
     // MARK: - Show/Hide views
@@ -412,17 +398,11 @@ class CalendarTitleView: UIView {
     }
     
     func refreshDateLabelsByNewValue(month month: Int, year: Int, animate: Bool) {
-        var monthChanged = true
-        var yearChanged = true
-        if self.monthValue == month { monthChanged = false }
-        if self.yearValue == year { yearChanged = false }
-        
-        if monthChanged {
+        if self.monthValue != month {
             self.monthValue = month
             refreshMonthLabels(animate: animate)
         }
-        
-        if yearChanged {
+        if self.yearValue != year {
             self.yearValue = year
             refreshYearLabels(animate: animate)
         }
@@ -463,13 +443,6 @@ class CalendarTitleView: UIView {
     }
 }
 
-extension CalendarTitleView: DVCalendarForTitleViewDelegate {
-    func didChangeDate(month: Int, year: Int) {
-        self.monthValue = month
-        self.yearValue = year
-        self.setNeedsDisplay()
-    }
-}
 
 //---------------------------------------------------------------//
 //--------------------------- BOXDAY ----------------------------//
