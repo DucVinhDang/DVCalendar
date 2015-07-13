@@ -8,21 +8,28 @@
 
 import UIKit
 
+@objc protocol DVCalendarForTitleViewDelegate {
+    func didChangeDate(month: Int, year: Int)
+}
+
+
 class DVCalendar: UIViewController {
     
     // MARK: - Properties
     
     weak var target: UIViewController!
+    weak var titleView: CalendarTitleView!
     weak var mainScrollView: UIScrollView!
     var subScrollViewArray = [UIScrollView]()
-    var calendarTitleViewArray = [CalendarTitleView]()
     var subViewArray = [UIView]()
+    var calendarSubViewDataArray = [DVCalendarSubViewData]()
     
     var frame: CGRect!
     
     var todayDate: [String:Int]!
     var calendarTitleViewSize: CGSize!
     
+    weak var titleViewDelegate: DVCalendarForTitleViewDelegate!
     
     
     // MARK: - Init methods
@@ -62,14 +69,31 @@ class DVCalendar: UIViewController {
     
     
     private func setupComponentsInsideCalendarView() {
+        setupCalendarTitleView()
         setupCalendarScrollView()
+    }
+    
+    private func setupCalendarTitleView() {
+        let todayDate = DVCalendarAPI.getTodayDate()
+        calendarTitleViewSize = CGSize(width: frame.width, height: frame.height/5)
+        let strongTitleView = createCalendarTitleViewWithFrameAndDate(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: calendarTitleViewSize), month: Int(todayDate["Month"]!), year: Int(todayDate["Year"]!))
+        view.addSubview(strongTitleView)
+        
+        view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Top, relatedBy: .Equal, toItem: view, attribute: .Top, multiplier: 1.0, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1.0, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1.0, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: strongTitleView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: calendarTitleViewSize.height))
+        
+        titleViewDelegate = strongTitleView
+        
+        titleView = strongTitleView
     }
     
     private func setupCalendarScrollView() {
         //setupCalendarTitleViewWithDate(Int(todayDate["Month"]!), year: Int(todayDate["Year"]!))
-        let strongMainScrollView = UIScrollView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height))
-        strongMainScrollView.contentSize = CGSizeMake(3 * self.view.bounds.width, self.view.bounds.height)
-        strongMainScrollView.backgroundColor = UIColor.clearColor()
+        let strongMainScrollView = UIScrollView(frame: CGRect(x: 0, y: calendarTitleViewSize.height, width: self.view.bounds.width, height: self.view.bounds.height - calendarTitleViewSize.height))
+        strongMainScrollView.contentSize = CGSizeMake(3 * self.view.bounds.width, self.view.bounds.height - calendarTitleViewSize.height)
+        strongMainScrollView.backgroundColor = UIColor.whiteColor()
         strongMainScrollView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
         strongMainScrollView.delegate = self
         strongMainScrollView.pagingEnabled = true
@@ -98,10 +122,6 @@ class DVCalendar: UIViewController {
         todayDate = DVCalendarAPI.getTodayDate()
         
         for j in 0...2 {
-            let subView = UIView(frame: CGRect(x: 0, y: CGFloat(j) * subScrollView.bounds.height, width: subScrollView.bounds.width, height: subScrollView.bounds.height))
-            subView.backgroundColor = UIColor.whiteColor()
-            subView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
-            
             var month = Int(todayDate["Month"]!) + (index-1)
             var year = Int(todayDate["Year"]!) + (j-1)
             
@@ -110,30 +130,31 @@ class DVCalendar: UIViewController {
             month = Int(dateForTitle["Month"]!)
             year = Int(dateForTitle["Year"]!)
             
-            let titleView = createCalendarTitleViewWithDate(month, year: year)
-            subView.addSubview(titleView)
-            
-            subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Top, relatedBy: .Equal, toItem: subView, attribute: .Top, multiplier: 1.0, constant: 0))
-            subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Left, relatedBy: .Equal, toItem: subView, attribute: .Left, multiplier: 1.0, constant: 0))
-            subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Right, relatedBy: .Equal, toItem: subView, attribute: .Right, multiplier: 1.0, constant: 0))
-            subView.addConstraint(NSLayoutConstraint(item: titleView, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: calendarTitleViewSize.height))
-            
             let margin: CGFloat = 10
             
-            let listDayView = createCalendarListDayViewWithFrameAndDate(frame: CGRect(x: 0, y: titleView.bounds.height, width: subScrollView.bounds.width, height: subScrollView.bounds.height - titleView.bounds.height - margin), month: month, year: year)
-            listDayView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
-            subView.addSubview(listDayView)
+            let subView = createCalendarListDayViewWithFrameAndDate(frame: CGRect(x: 0, y: CGFloat(j) * subScrollView.bounds.height, width: subScrollView.bounds.width, height: subScrollView.bounds.height - margin), month: month, year: year)
+            subView.backgroundColor = UIColor.whiteColor()
+            subView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
             
             subScrollView.addSubview(subView)
+            subViewArray.append(subView)
+            
+            let subScrollViewContentOffset = CGPoint(x: 0, y: ceil(subScrollView.bounds.height * CGFloat(j)))
+            let mainScrollViewContentOffset = CGPoint(x: ceil(mainScrollView.bounds.width * CGFloat(index)), y: 0)
+            
+            let data = DVCalendarSubViewData(subScrollViewContentOffset: subScrollViewContentOffset, mainScrollViewContentOffset: mainScrollViewContentOffset, day: 0, month: month, year: year)
+            calendarSubViewDataArray.append(data)
+            
         }
         subScrollView.scrollRectToVisible(CGRect(x: 0, y: subScrollView.bounds.height, width: subScrollView.bounds.width, height: subScrollView.bounds.height), animated: false)
         
         mainScrollView.addSubview(subScrollView)
+        subScrollViewArray.append(subScrollView)
     }
     
-    private func createCalendarTitleViewWithDate(month: Int, year: Int) -> CalendarTitleView {
-        calendarTitleViewSize = CGSize(width: frame.width, height: frame.height/5)
-        let strongTitleView = CalendarTitleView(frame: CGRect(x: 0, y: 0, width: calendarTitleViewSize.width, height: calendarTitleViewSize.height), month: month, year: year)
+    private func createCalendarTitleViewWithFrameAndDate(frame frame: CGRect, month: Int, year: Int) -> CalendarTitleView {
+//        calendarTitleViewSize = CGSize(width: frame.width, height: frame.height/5)
+        let strongTitleView = CalendarTitleView(frame: frame, month: month, year: year)
         return strongTitleView
     }
     
@@ -213,13 +234,27 @@ class DVCalendar: UIViewController {
     
     func deviceRotated() {
         if view.superview != nil {
-            
         }
     }
 }
 
 extension DVCalendar: UIScrollViewDelegate {
-    
+    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+        let currentSubScrollViewIndex = Int(ceil(mainScrollView.contentOffset.x/mainScrollView.bounds.width))
+        if currentSubScrollViewIndex > 2 || currentSubScrollViewIndex < 0 { return }
+        let subScroll = subScrollViewArray[currentSubScrollViewIndex]
+        
+        let subScrollContentOffset = CGPoint(x: subScroll.contentOffset.x, y: ceil(subScroll.contentOffset.y))
+        let mainScrollContentOffset = CGPoint(x: ceil(mainScrollView.contentOffset.x), y: mainScrollView.contentOffset.y)
+        
+        for data in calendarSubViewDataArray {
+            if data.mainScrollViewContentOffset == mainScrollContentOffset && data.subScrollViewContentOffset == subScrollContentOffset {
+                titleView.refreshDateLabelsByNewValue(month: data.month, year: data.year, animate: true)
+                break
+            }
+        }
+        
+    }
 }
 
 //---------------------------------------------------------------//
@@ -244,6 +279,7 @@ class CalendarTitleView: UIView {
     let lineColor = UIColor.randomColor()
     
     var monthLabelArray = [UILabel]()
+    weak var yearLabel: UILabel!
     let distanceBetweenMonthLabels: CGFloat = 10
     
     
@@ -279,22 +315,12 @@ class CalendarTitleView: UIView {
         CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
         CGContextFillRect(context, rect)
         
-        for subView in self.subviews {
-            subView.removeFromSuperview()
-        }
-        
-        for subLabel in monthLabelArray {
-            subLabel.removeFromSuperview()
-        }
+        removeAllSubViewInMainView()
+        removeAllMonthLabelArray()
         
         let halfHeight = self.bounds.height/2
         
-        for i in 0...2 {
-            let getDate = DVCalendarAPI.getDateAfterAddNewDate(currentDay: 1, currentMonth: monthValue, currentYear: 2000, numberDayToAdd: 0, numberMonthToAdd: i-1, numberYearToAdd: 0)
-            let currentMonthValue = Int(getDate["Month"]!)
-            addMonthLabelWithMonthValue(currentMonthValue, index: i)
-        }
-        
+        addMonthLabels()
         addYearLabel()
         
         let dayArray = ["M", "T", "W", "T", "F", "S", "S"]
@@ -310,11 +336,6 @@ class CalendarTitleView: UIView {
             dayLabelArray.append(dayLabel)
         }
         
-//        for i in 0...6 {
-//            let dayLabel = dayLabelArray[i] as UILabel
-//            addConstraintForDayLabelAtIndex(index: i, label: dayLabel)
-//        }
-        
         let linePath = UIBezierPath()
         linePath.moveToPoint(CGPoint(x: lineWidth, y: self.bounds.height - lineWidth - lineWidth/2))
         linePath.addLineToPoint(CGPoint(x: self.bounds.width - lineWidth, y: self.bounds.height - lineWidth - lineWidth/2))
@@ -323,6 +344,7 @@ class CalendarTitleView: UIView {
         linePath.stroke()
         linePath.closePath()
     }
+    
     
     private func addMonthLabelWithMonthValue(value: Int, index: Int) {
         let halfHeight = self.bounds.height/2
@@ -346,24 +368,106 @@ class CalendarTitleView: UIView {
         monthLabelArray.append(monthLabel)
     }
     
+    private func addMonthLabels() {
+        for i in 0...2 {
+            let getDate = DVCalendarAPI.getDateAfterAddNewDate(currentDay: 1, currentMonth: monthValue, currentYear: 2000, numberDayToAdd: 0, numberMonthToAdd: i-1, numberYearToAdd: 0)
+            let currentMonthValue = Int(getDate["Month"]!)
+            addMonthLabelWithMonthValue(currentMonthValue, index: i)
+        }
+    }
+    
     private func addYearLabel() {
         let halfHeight = self.bounds.height/2
         
         let yearText: NSString = String(yearValue) as NSString
         let yearTextSize: CGSize = yearText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(yearTextFontSize)])
         
-        let yearLabel = UILabel(frame: CGRect(x: self.bounds.width - margin - yearTextSize.width, y: margin, width: yearTextSize.width, height: halfHeight - margin))
-        yearLabel.text = yearText as String
-        yearLabel.font = UIFont(name: "Helvetica", size: yearTextFontSize)
-        yearLabel.textAlignment = NSTextAlignment.Center
-        self.addSubview(yearLabel)
+        let yearLab = UILabel(frame: CGRect(x: self.bounds.width - margin - yearTextSize.width, y: margin, width: yearTextSize.width, height: halfHeight - margin))
+        yearLab.text = yearText as String
+        yearLab.font = UIFont(name: "Helvetica", size: yearTextFontSize)
+        yearLab.textAlignment = NSTextAlignment.Center
+        self.addSubview(yearLab)
         
-        yearLabel.translatesAutoresizingMaskIntoConstraints = false
+        yearLab.translatesAutoresizingMaskIntoConstraints = false
         
-        self.addConstraint(NSLayoutConstraint(item: yearLabel, attribute: .Right, relatedBy: .Equal, toItem: self, attribute: .Right, multiplier: 1.0, constant: -margin))
-        self.addConstraint(NSLayoutConstraint(item: yearLabel, attribute: .Top, relatedBy: .Equal, toItem: self, attribute: .Top, multiplier: 1.0, constant: margin))
-        self.addConstraint(NSLayoutConstraint(item: yearLabel, attribute: .Width, relatedBy: .Equal, toItem: nil, attribute: .Width, multiplier: 1.0, constant: yearLabel.bounds.width))
-        self.addConstraint(NSLayoutConstraint(item: yearLabel, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: yearLabel.bounds.height))
+        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Right, relatedBy: .Equal, toItem: self, attribute: .Right, multiplier: 1.0, constant: -margin))
+        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Top, relatedBy: .Equal, toItem: self, attribute: .Top, multiplier: 1.0, constant: margin))
+        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Width, relatedBy: .Equal, toItem: nil, attribute: .Width, multiplier: 1.0, constant: yearLab.bounds.width))
+        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: yearLab.bounds.height))
+        
+        yearLabel = yearLab
+    }
+    
+    private func removeAllSubViewInMainView() {
+        for subView in self.subviews {
+            subView.removeFromSuperview()
+        }
+    }
+    
+    private func removeAllMonthLabelArray() {
+        for subLabel in monthLabelArray {
+            subLabel.removeFromSuperview()
+        }
+        monthLabelArray.removeAll()
+    }
+    
+    func refreshDateLabelsByNewValue(month month: Int, year: Int, animate: Bool) {
+        var monthChanged = true
+        var yearChanged = true
+        if self.monthValue == month { monthChanged = false }
+        if self.yearValue == year { yearChanged = false }
+        
+        if monthChanged {
+            self.monthValue = month
+            refreshMonthLabels(animate: animate)
+        }
+        
+        if yearChanged {
+            self.yearValue = year
+            refreshYearLabels(animate: animate)
+        }
+    }
+    
+    private func refreshMonthLabels(animate animate: Bool) {
+        if animate {
+            UIView.animateWithDuration(0.3, animations: {
+                for subLabel in self.monthLabelArray {
+                    subLabel.alpha = 0
+                }
+            }, completion: { finished in
+                self.removeAllMonthLabelArray()
+                self.addMonthLabels()
+                for subLabel in self.monthLabelArray {
+                    subLabel.alpha = 0
+                }
+                UIView.animateWithDuration(0.3, animations: {
+                    for subLabel in self.monthLabelArray {
+                        subLabel.alpha = 1
+                    }
+                })
+            })
+        }
+    }
+    
+    private func refreshYearLabels(animate animate: Bool) {
+        if animate {
+            UIView.animateWithDuration(0.3, animations: {
+                self.yearLabel.alpha = 0
+            }, completion: { finished in
+                self.yearLabel.text = "\(self.yearValue)"
+                UIView.animateWithDuration(0.3, animations: {
+                    self.yearLabel.alpha = 1
+                })
+            })
+        }
+    }
+}
+
+extension CalendarTitleView: DVCalendarForTitleViewDelegate {
+    func didChangeDate(month: Int, year: Int) {
+        self.monthValue = month
+        self.yearValue = year
+        self.setNeedsDisplay()
     }
 }
 
@@ -389,6 +493,35 @@ class BoxDay: UIButton {
         linePath.closePath()
     }
 }
+
+//---------------------------------------------------------------//
+//--------------------------- DVCALENDARDATA --------------------//
+//---------------------------------------------------------------//
+
+class DVCalendarSubViewData {
+    var subScrollViewContentOffset: CGPoint!
+    var mainScrollViewContentOffset: CGPoint!
+    var day: Int!
+    var month: Int!
+    var year: Int!
+    
+    init(subScrollViewContentOffset: CGPoint, mainScrollViewContentOffset: CGPoint, day: Int, month: Int, year: Int) {
+        self.subScrollViewContentOffset = subScrollViewContentOffset
+        self.mainScrollViewContentOffset = mainScrollViewContentOffset
+        self.day = day
+        self.month = month
+        self.year = year
+    }
+    
+    func getDateString() -> String {
+        return "\(day)/\(month)/\(year)"
+    }
+    
+    func description() -> String {
+        return "\(mainScrollViewContentOffset)-\(subScrollViewContentOffset) : \(getDateString())"
+    }
+}
+
 
 //---------------------------------------------------------------//
 //------------------------ DVCALENDARAPI ------------------------//
