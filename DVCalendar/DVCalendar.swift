@@ -272,13 +272,21 @@ extension DVCalendar: UIScrollViewDelegate {
         if self.subScrollViewIndex != subScrollIndex {
             switch subScrollIndex {
             case 0:
-                refreshSubScrollViewAccordingTo(subScrollIndex: subScrollIndex, mainScrollIndex: mainScrollIndex, viewToRemoveIndex: 2)
+                for i in 0...2 {
+                    refreshSubScrollViewAccordingTo(subScrollIndex: subScrollIndex, mainScrollIndex: i, viewToRemoveIndex: 2)
+                }
             case 2:
-                refreshSubScrollViewAccordingTo(subScrollIndex: subScrollIndex, mainScrollIndex: mainScrollIndex, viewToRemoveIndex: 0)
+                for i in 0...2 {
+                    refreshSubScrollViewAccordingTo(subScrollIndex: subScrollIndex, mainScrollIndex: i, viewToRemoveIndex: 0)
+                }
             default:
                 break
             }
         }
+        for data in calendarSubViewDataArray {
+            print(data.description())
+        }
+        print("--------------------------")
     }
     
     private func refreshSubScrollViewAccordingTo(subScrollIndex subScrollIndex: Int, mainScrollIndex: Int, viewToRemoveIndex: Int) {
@@ -332,10 +340,7 @@ extension DVCalendar: UIScrollViewDelegate {
                 }
                 subScrollViewToAdd.scrollRectToVisible(CGRect(x: 0, y: subScrollViewToAdd.bounds.height, width: subScrollViewToAdd.bounds.width, height: subScrollViewToAdd.bounds.height), animated: false)
                 
-                for data in calendarSubViewDataArray {
-                    print(data.description())
-                }
-                print("--------------------------")
+        
     }
     
     private func getCalendarSubviewDataByIndexes(mainScrollViewIndex mainScrollViewIndex: Int, subScrollViewIndex: Int) -> DVCalendarSubViewData? {
