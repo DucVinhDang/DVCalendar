@@ -15,8 +15,13 @@ class DVCalendar: UIViewController {
     weak var target: UIViewController!
     weak var titleView: CalendarTitleView!
     weak var mainScrollView: UIScrollView!
+    
     var subScrollViewArray = [UIScrollView]()
-    var subViewArray = [UIView]()
+    var subViewArray: [Int:[UIView]] = [
+        0 : [],
+        1 : [],
+        2 : []
+    ]
     var calendarSubViewDataArray = [DVCalendarSubViewData]()
     
     var frame: CGRect!
@@ -24,7 +29,8 @@ class DVCalendar: UIViewController {
     var todayDate: [String:Int]!
     var calendarTitleViewSize: CGSize!
     
-    
+    var mainScrollViewIndex = 1
+    var subScrollViewIndex = 1
     
     // MARK: - Init methods
     
@@ -129,19 +135,19 @@ class DVCalendar: UIViewController {
             subView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
             
             subScrollView.addSubview(subView)
-            subViewArray.append(subView)
+            subViewArray[index]!.append(subView)
             
-            let subScrollViewContentOffset = CGPoint(x: 0, y: ceil(subScrollView.bounds.height * CGFloat(j)))
-            let mainScrollViewContentOffset = CGPoint(x: ceil(mainScrollView.bounds.width * CGFloat(index)), y: 0)
-            
-            let data = DVCalendarSubViewData(subScrollViewContentOffset: subScrollViewContentOffset, mainScrollViewContentOffset: mainScrollViewContentOffset, day: 0, month: month, year: year)
+            let data = DVCalendarSubViewData(subScrollViewIndex: j, mainScrollViewIndex: index, day: 0, month: month, year: year)
             calendarSubViewDataArray.append(data)
-            
         }
         subScrollView.scrollRectToVisible(CGRect(x: 0, y: subScrollView.bounds.height, width: subScrollView.bounds.width, height: subScrollView.bounds.height), animated: false)
         
         mainScrollView.addSubview(subScrollView)
         subScrollViewArray.append(subScrollView)
+    }
+    
+    private func createSubViewForSubScrollView(frame frame: CGRect, month: Int, year: Int, subScrollView: UIScrollView, mainScrollViewIndex: Int) {
+        
     }
     
     private func createCalendarTitleViewWithFrameAndDate(frame frame: CGRect, month: Int, year: Int) -> CalendarTitleView {
@@ -226,20 +232,97 @@ class DVCalendar: UIViewController {
 
 extension DVCalendar: UIScrollViewDelegate {
     func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
-        let currentSubScrollViewIndex = Int(ceil(mainScrollView.contentOffset.x/mainScrollView.bounds.width))
-        if currentSubScrollViewIndex > 2 || currentSubScrollViewIndex < 0 { return }
-        let subScroll = subScrollViewArray[currentSubScrollViewIndex]
+        let currentMainScrollViewIndex = Int(mainScrollView.contentOffset.x/mainScrollView.bounds.width)
+        if currentMainScrollViewIndex > 2 || currentMainScrollViewIndex < 0 { return }
         
-        let subScrollContentOffset = CGPoint(x: subScroll.contentOffset.x, y: ceil(subScroll.contentOffset.y))
-        let mainScrollContentOffset = CGPoint(x: ceil(mainScrollView.contentOffset.x), y: mainScrollView.contentOffset.y)
+        let subScroll = subScrollViewArray[currentMainScrollViewIndex]
+        let currentSubScrollViewIndex = Int(round(subScroll.contentOffset.y/subScroll.bounds.height))
         
+        print(currentMainScrollViewIndex)
+        print(currentSubScrollViewIndex)
+        
+//        for data in calendarSubViewDataArray {
+//            print(data.description())
+//        }
+//        print("--------------------------")
+        
+        refreshTheTitleViewByIndexes(subScrollIndex: currentSubScrollViewIndex, mainScrollIndex: currentMainScrollViewIndex)
+        refreshAllSubScrollViewAccordingIndexes(subScrollIndex: currentSubScrollViewIndex, mainScrollIndex: currentMainScrollViewIndex)
+    }
+    
+    func refreshTheTitleViewByIndexes(subScrollIndex subScrollIndex: Int, mainScrollIndex: Int) {
         for data in calendarSubViewDataArray {
-            if data.mainScrollViewContentOffset == mainScrollContentOffset && data.subScrollViewContentOffset == subScrollContentOffset {
+            if data.subScrollViewIndex == subScrollIndex && data.mainScrollViewIndex == mainScrollIndex {
                 titleView.refreshDateLabelsByNewValue(month: data.month, year: data.year, animate: true)
                 break
             }
         }
-        
+    }
+    
+    func refreshAllSubScrollViewAccordingIndexes(subScrollIndex subScrollIndex: Int, mainScrollIndex: Int) {
+        if self.subScrollViewIndex != subScrollIndex {
+            switch subScrollIndex {
+            case 0:
+                let firstSubViewToReplace = getCalendarSubviewDataByIndexes(mainScrollViewIndex: mainScrollIndex, subScrollViewIndex: 0)
+                let secondSubViewToReplace = getCalendarSubviewDataByIndexes(mainScrollViewIndex: mainScrollIndex, subScrollViewIndex: 1)
+                let thirdSubViewToReplace = getCalendarSubviewDataByIndexes(mainScrollViewIndex: mainScrollIndex, subScrollViewIndex: 2)
+                
+                thirdSubViewToReplace?.setNewDate(day: secondSubViewToReplace!.day, month: secondSubViewToReplace!.month, year: secondSubViewToReplace!.year)
+                secondSubViewToReplace?.setNewDate(day: firstSubViewToReplace!.day, month: firstSubViewToReplace!.month, year: firstSubViewToReplace!.year)
+                
+                let viewToRemove = subViewArray[mainScrollIndex]![2] as UIView
+                viewToRemove.removeFromSuperview()
+                subViewArray[mainScrollIndex]!.removeAtIndex(2)
+                
+                for viewToMove in subViewArray[mainScrollIndex]! {
+                    viewToMove.frame.origin = CGPoint(x: viewToMove.frame.origin.x, y: viewToMove.frame.origin.y + 10 + viewToMove.bounds.height)
+                }
+                
+                let subScrollViewToAdd = subScrollViewArray[mainScrollIndex]
+                
+                for data in calendarSubViewDataArray {
+                    if data.subScrollViewIndex == subScrollIndex && data.mainScrollViewIndex == mainScrollIndex {
+                        let month = data.month
+                        let year = data.year - 1
+                        
+                        let margin: CGFloat = 10
+                        
+                        let subView = createCalendarListDayViewWithFrameAndDate(frame: CGRect(x: 0, y: 0, width: subScrollViewToAdd.frame.width, height: subScrollViewToAdd.frame.height - margin), month: month, year: year)
+                        subView.backgroundColor = UIColor.whiteColor()
+                        subView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+                        
+                        subScrollViewToAdd.addSubview(subView)
+                        subViewArray[mainScrollIndex]!.insert(subView, atIndex: 0)
+                        
+                        let newData = DVCalendarSubViewData(subScrollViewIndex: 0, mainScrollViewIndex: mainScrollIndex, day: 0, month: month, year: year)
+                        
+                        let dataToChange = getCalendarSubviewDataByIndexes(mainScrollViewIndex: mainScrollIndex, subScrollViewIndex: 0)
+                        dataToChange?.setNewData(newData)
+                        break
+                    }
+                }
+                subScrollViewToAdd.scrollRectToVisible(CGRect(x: 0, y: subScrollViewToAdd.bounds.height, width: subScrollViewToAdd.bounds.width, height: subScrollViewToAdd.bounds.height), animated: false)
+                
+                for data in calendarSubViewDataArray {
+                    print(data.description())
+                }
+                print("--------------------------")
+
+            case 2:
+                print("")
+            default:
+                break
+            }
+        }
+    }
+    
+    private func getCalendarSubviewDataByIndexes(mainScrollViewIndex mainScrollViewIndex: Int, subScrollViewIndex: Int) -> DVCalendarSubViewData? {
+        for data in calendarSubViewDataArray {
+            if data.mainScrollViewIndex == mainScrollViewIndex && data.subScrollViewIndex == subScrollViewIndex {
+                return data
+            }
+        }
+        return nil
     }
 }
 
@@ -472,18 +555,32 @@ class BoxDay: UIButton {
 //---------------------------------------------------------------//
 
 class DVCalendarSubViewData {
-    var subScrollViewContentOffset: CGPoint!
-    var mainScrollViewContentOffset: CGPoint!
+    var subScrollViewIndex: Int
+    var mainScrollViewIndex: Int
     var day: Int!
     var month: Int!
     var year: Int!
     
-    init(subScrollViewContentOffset: CGPoint, mainScrollViewContentOffset: CGPoint, day: Int, month: Int, year: Int) {
-        self.subScrollViewContentOffset = subScrollViewContentOffset
-        self.mainScrollViewContentOffset = mainScrollViewContentOffset
+    init(subScrollViewIndex: Int, mainScrollViewIndex: Int, day: Int, month: Int, year: Int) {
+        self.subScrollViewIndex = subScrollViewIndex
+        self.mainScrollViewIndex = mainScrollViewIndex
         self.day = day
         self.month = month
         self.year = year
+    }
+    
+    func setNewDate(day day: Int, month: Int, year: Int) {
+        self.day = day
+        self.month = month
+        self.year = year
+    }
+    
+    func setNewData(newData: DVCalendarSubViewData) {
+        self.subScrollViewIndex = newData.subScrollViewIndex
+        self.mainScrollViewIndex = newData.mainScrollViewIndex
+        self.day = newData.day
+        self.month = newData.month
+        self.year = newData.year
     }
     
     func getDateString() -> String {
@@ -491,7 +588,7 @@ class DVCalendarSubViewData {
     }
     
     func description() -> String {
-        return "\(mainScrollViewContentOffset)-\(subScrollViewContentOffset) : \(getDateString())"
+        return "\(mainScrollViewIndex)-\(subScrollViewIndex) : \(getDateString())"
     }
 }
 
