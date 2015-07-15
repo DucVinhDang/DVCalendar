@@ -249,20 +249,6 @@ class DVCalendar: UIViewController {
 
 extension DVCalendar: UIScrollViewDelegate {
     func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
-//        let currentMainScrollViewIndex = Int(mainScrollView.contentOffset.x/mainScrollView.bounds.width)
-//        if currentMainScrollViewIndex > 2 || currentMainScrollViewIndex < 0 { return }
-//        
-//        let subScroll = subScrollViewArray[currentMainScrollViewIndex]
-//        let currentSubScrollViewIndex = Int(round(subScroll.contentOffset.y/subScroll.bounds.height))
-//        
-////        for data in calendarSubViewDataArray {
-////            print(data.description())
-////        }
-////        print("--------------------------")
-//        
-//        refreshTheTitleViewByIndexes(subScrollIndex: currentSubScrollViewIndex, mainScrollIndex: currentMainScrollViewIndex)
-//        refreshAllScrollViewAccordingToIndexes(subScrollIndex: currentSubScrollViewIndex, mainScrollIndex: currentMainScrollViewIndex)
-        
         let currentMainScrollViewIndex = mainScrollView.contentOffset.x/mainScrollView.bounds.width
         if currentMainScrollViewIndex > 2 || currentMainScrollViewIndex < 0 || currentMainScrollViewIndex % 1 != 0 { return }
         
@@ -348,7 +334,7 @@ extension DVCalendar: UIScrollViewDelegate {
                 let year = viewToRemoveIndex == 0 ? data!.year + 1 : data!.year - 1
                 
                 if viewToRemoveIndex == 0 {
-                    createSubViewForSubScrollView(frame: CGRect(x: 0, y: subScrollViewToAdd.contentSize.height - 10 - subScrollViewToAdd.frame.height, width: subScrollViewToAdd.frame.width, height: subScrollViewToAdd.frame.height - 10), month: month, year: year, subScrollView: subScrollViewToAdd, subScrollViewIndex: 2, mainScrollViewIndex: mainScrollIndex)
+                    createSubViewForSubScrollView(frame: CGRect(x: 0, y: subScrollViewToAdd.frame.height*2, width: subScrollViewToAdd.frame.width, height: subScrollViewToAdd.frame.height - 10), month: month, year: year, subScrollView: subScrollViewToAdd, subScrollViewIndex: 2, mainScrollViewIndex: mainScrollIndex)
                     
                     let newData = DVCalendarSubViewData(subScrollViewIndex: 2, mainScrollViewIndex: mainScrollIndex, day: 0, month: month, year: year)
                     let dataToChange = getCalendarSubviewDataByIndexes(mainScrollViewIndex: mainScrollIndex, subScrollViewIndex: 2)
@@ -447,10 +433,6 @@ extension DVCalendar: UIScrollViewDelegate {
             createSubScrollViewWithFrameAndRootDate(CGRect(x: 0, y: 0, width: mainScrollView.bounds.width, height: mainScrollView.bounds.height), rootMonth: rootData!.month, rootYear: rootData!.year, index: 0)
         default:
             break
-        }
-        
-        for subView in subScrollViewArray {
-            print(subView.frame)
         }
         
         mainScrollView.scrollRectToVisible(CGRect(x: mainScrollView.bounds.width, y: 0, width: mainScrollView.bounds.width, height: mainScrollView.bounds.height), animated: false)
