@@ -15,6 +15,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <animations/>
             <color key="backgroundColor" red="0.83761452879581155" green="0.83761452879581155" blue="0.83761452879581155" alpha="1" colorSpace="calibratedRGB"/>
+            <point key="canvasLocation" x="433" y="379"/>
         </view>
     </objects>
 </document>

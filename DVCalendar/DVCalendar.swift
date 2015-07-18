@@ -243,6 +243,7 @@ class DVCalendar: UIViewController {
     
     func deviceRotated() {
         if view.superview != nil {
+            titleView.setNeedsDisplay()
         }
     }
 }
@@ -462,9 +463,9 @@ class CalendarTitleView: UIView {
     var monthValue = 0
     var yearValue = 0
     
-    let monthTextFontSize: CGFloat = 17
-    let yearTextFontSize: CGFloat = 20
-    let dayLabelFontSize: CGFloat = 11
+    var monthTextFontSize: CGFloat!
+    var yearTextFontSize: CGFloat!
+    var dayLabelFontSize: CGFloat!
     
     let lineWidth: CGFloat = 4
     let lineColor = UIColor.randomColor()
@@ -495,6 +496,18 @@ class CalendarTitleView: UIView {
     private func setupView() {
         self.backgroundColor = UIColor.clearColor()
         self.translatesAutoresizingMaskIntoConstraints = false
+        
+        if UIDevice.currentDevice().userInterfaceIdiom == UIUserInterfaceIdiom.Phone {
+            if UIScreen.mainScreen().bounds.size.width > 320 {
+                monthTextFontSize = 17
+                yearTextFontSize = 20
+                dayLabelFontSize = 11
+            } else {
+                monthTextFontSize = 13
+                yearTextFontSize = 18
+                dayLabelFontSize = 10
+            }
+        }
     }
     
     override func drawRect(rect: CGRect) {
@@ -541,7 +554,7 @@ class CalendarTitleView: UIView {
         let halfHeight = self.bounds.height/2
         
         let monthText: NSString = DVCalendarAPI.convertMonthValueToText(monthValue: value) as NSString
-        let monthTextSize: CGSize = monthText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(monthTextFontSize+2)])
+        let monthTextSize: CGSize = monthText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(monthTextFontSize+1)])
         
         var monthLabelOriginX: CGFloat = 0
         for label in monthLabelArray {
@@ -571,7 +584,7 @@ class CalendarTitleView: UIView {
         let halfHeight = self.bounds.height/2
         
         let yearText: NSString = String(yearValue) as NSString
-        let yearTextSize: CGSize = yearText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(yearTextFontSize)])
+        let yearTextSize: CGSize = yearText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(yearTextFontSize+2)])
         
         let yearLab = UILabel(frame: CGRect(x: self.bounds.width - margin - yearTextSize.width, y: margin, width: yearTextSize.width, height: halfHeight - margin))
         yearLab.text = yearText as String
@@ -579,12 +592,12 @@ class CalendarTitleView: UIView {
         yearLab.textAlignment = NSTextAlignment.Center
         self.addSubview(yearLab)
         
-        yearLab.translatesAutoresizingMaskIntoConstraints = false
-        
-        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Right, relatedBy: .Equal, toItem: self, attribute: .Right, multiplier: 1.0, constant: -margin))
-        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Top, relatedBy: .Equal, toItem: self, attribute: .Top, multiplier: 1.0, constant: margin))
-        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Width, relatedBy: .Equal, toItem: nil, attribute: .Width, multiplier: 1.0, constant: yearLab.bounds.width))
-        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: yearLab.bounds.height))
+//        yearLab.translatesAutoresizingMaskIntoConstraints = false
+//        
+//        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Right, relatedBy: .Equal, toItem: self, attribute: .Right, multiplier: 1.0, constant: -margin))
+//        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Top, relatedBy: .Equal, toItem: self, attribute: .Top, multiplier: 1.0, constant: margin))
+//        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Width, relatedBy: .Equal, toItem: nil, attribute: .Width, multiplier: 1.0, constant: yearLab.bounds.width))
+//        self.addConstraint(NSLayoutConstraint(item: yearLab, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1.0, constant: yearLab.bounds.height))
         
         yearLabel = yearLab
     }
