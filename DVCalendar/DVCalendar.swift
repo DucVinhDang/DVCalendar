@@ -8,6 +8,10 @@
 
 import UIKit
 
+@objc protocol DVCalendarDelegate {
+    optional func clickedOnDate(day: Int, month: Int, year: Int)
+}
+
 class DVCalendar: UIViewController {
     
     // MARK: - Properties
@@ -15,6 +19,7 @@ class DVCalendar: UIViewController {
     weak var target: UIViewController!
     weak var titleView: CalendarTitleView!
     weak var mainScrollView: UIScrollView!
+    weak var delegate: DVCalendarDelegate?
     
     var subScrollViewArray = [UIScrollView]()
     var subViewArray: [Int:[UIView]] = [
@@ -74,7 +79,7 @@ class DVCalendar: UIViewController {
     }
     
     private func setupCalendarTitleView() {
-        let todayDate = DVCalendarAPI.getTodayDate()
+        let todayDate = DVCalendarAPI.shareInstance.getTodayDate()
         calendarTitleViewSize = CGSize(width: frame.width, height: frame.height/5)
         let strongTitleView = createCalendarTitleViewWithFrameAndDate(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: calendarTitleViewSize), month: Int(todayDate["Month"]!), year: Int(todayDate["Year"]!))
         view.addSubview(strongTitleView)
@@ -101,7 +106,7 @@ class DVCalendar: UIViewController {
         view.addSubview(strongMainScrollView)
         mainScrollView = strongMainScrollView
         
-        todayDate = DVCalendarAPI.getTodayDate()
+        todayDate = DVCalendarAPI.shareInstance.getTodayDate()
         
         for i in 0...2 {
             createSubScrollViewWithFrameAndRootDate(CGRect(x: CGFloat(i) * strongMainScrollView.bounds.width, y: 0, width: strongMainScrollView.bounds.width, height: strongMainScrollView.bounds.height), rootMonth: Int(todayDate["Month"]!), rootYear: Int(todayDate["Year"]!), index: i)
@@ -123,7 +128,7 @@ class DVCalendar: UIViewController {
             var month = rootMonth
             var year = rootYear
             
-            let dateForTitle = DVCalendarAPI.getDateAfterAddNewDate(currentDay: 1, currentMonth: month, currentYear: year, numberDayToAdd: 0, numberMonthToAdd: index-1, numberYearToAdd: j-1)
+            let dateForTitle = DVCalendarAPI.shareInstance.getDateAfterAddNewDate(currentDay: 1, currentMonth: month, currentYear: year, numberDayToAdd: 0, numberMonthToAdd: index-1, numberYearToAdd: j-1)
             
             month = Int(dateForTitle["Month"]!)
             year = Int(dateForTitle["Year"]!)
@@ -177,19 +182,19 @@ class DVCalendar: UIViewController {
         let listDayView = UIView(frame: frame)
         let boxDaySize = CGSize(width: listDayView.bounds.width/7, height: listDayView.bounds.height/6)
         
-        var firstDayOfMonthPosition = DVCalendarAPI.getDayOfWeek(day: 1, month: month, year: year)
+        var firstDayOfMonthPosition = DVCalendarAPI.shareInstance.getDayOfWeek(day: 1, month: month, year: year)
         if firstDayOfMonthPosition == 1 { firstDayOfMonthPosition = 8 }
         
         var countMonthBefore = 2
         var countMonthNow = 1
         var countMonthAfter = 1
         
-        let dateOfMonthBefore = DVCalendarAPI.getDateAfterAddNewDate(currentDay: 1, currentMonth: month, currentYear: year, numberDayToAdd: 0, numberMonthToAdd: -1, numberYearToAdd: 0)
+        let dateOfMonthBefore = DVCalendarAPI.shareInstance.getDateAfterAddNewDate(currentDay: 1, currentMonth: month, currentYear: year, numberDayToAdd: 0, numberMonthToAdd: -1, numberYearToAdd: 0)
         
-        let amountDayOfMonthBefore = DVCalendarAPI.getNumberDaysInMonthOfYear(month: Int(dateOfMonthBefore["Month"]!), year: Int(dateOfMonthBefore["Year"]!))
-        let amountDayOfCurrentMonth = DVCalendarAPI.getNumberDaysInMonthOfYear(month: month, year: year)
+        let amountDayOfMonthBefore = DVCalendarAPI.shareInstance.getNumberDaysInMonthOfYear(month: Int(dateOfMonthBefore["Month"]!), year: Int(dateOfMonthBefore["Year"]!))
+        let amountDayOfCurrentMonth = DVCalendarAPI.shareInstance.getNumberDaysInMonthOfYear(month: month, year: year)
         
-        let todayDate = DVCalendarAPI.getTodayDate()
+        let todayDate = DVCalendarAPI.shareInstance.getTodayDate()
         
         for i in 0...5 {
             for j in 0...6 {
@@ -197,29 +202,44 @@ class DVCalendar: UIViewController {
                 
                 var textDay = ""
                 var dayValue = 0
+                var monthValue = 0
+                var yearValue = 0
                 if countMonthBefore < firstDayOfMonthPosition {
                     dayValue = amountDayOfMonthBefore - (firstDayOfMonthPosition - countMonthBefore - 1)
+                    monthValue = month == 1 ? 12 : month - 1
+                    yearValue = month == 1 ? year - 1 : year
                     countMonthBefore++
                     boxDay.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
                 } else {
                     if countMonthNow <= amountDayOfCurrentMonth {
                         dayValue = countMonthNow
+                        monthValue = month
+                        yearValue = year
                         countMonthNow++
                         boxDay.setTitleColor(UIColor.blackColor(), forState: .Normal)
                     } else {
                         dayValue = countMonthAfter
+                        monthValue = month == 12 ? 1 : month + 1
+                        yearValue = month == 12 ? year + 1 : year
                         countMonthAfter++
                         boxDay.setTitleColor(UIColor.lightGrayColor(), forState: .Normal)
                     }
                 }
                 
-                if dayValue == Int(todayDate["Day"]!) && month == Int(todayDate["Month"]!) && year == Int(todayDate["Year"]!) {
+                if dayValue == Int(todayDate["Day"]!) && monthValue == Int(todayDate["Month"]!) && yearValue == Int(todayDate["Year"]!) {
                     boxDay.lineColor = UIColor.randomColor()
                 }
                 
                 textDay = "\(dayValue)"
+                
+                boxDay.day = dayValue
+                boxDay.month = monthValue
+                boxDay.year = yearValue
+                
                 boxDay.setTitle(textDay, forState: UIControlState.Normal)
                 boxDay.titleLabel?.font = UIFont(name: "Helvetica", size: 15)
+                boxDay.addTarget(self, action: Selector("handleClickedOnBoxDay:"), forControlEvents: UIControlEvents.TouchUpInside)
+                
                 listDayView.addSubview(boxDay)
             }
         }
@@ -245,6 +265,12 @@ class DVCalendar: UIViewController {
         if view.superview != nil {
             titleView.setNeedsDisplay()
         }
+    }
+    
+    // MARK: - BoxDay Actions
+    
+    func handleClickedOnBoxDay(boxDay: BoxDay) {
+        print("\(boxDay.day)-\(boxDay.month)-\(boxDay.year)", appendNewline: true)
     }
 }
 
@@ -553,7 +579,7 @@ class CalendarTitleView: UIView {
     private func addMonthLabelWithMonthValue(value: Int, index: Int) {
         let halfHeight = self.bounds.height/2
         
-        let monthText: NSString = DVCalendarAPI.convertMonthValueToText(monthValue: value) as NSString
+        let monthText: NSString = DVCalendarAPI.shareInstance.convertMonthValueToText(monthValue: value) as NSString
         let monthTextSize: CGSize = monthText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(monthTextFontSize+1)])
         
         var monthLabelOriginX: CGFloat = 0
@@ -574,7 +600,7 @@ class CalendarTitleView: UIView {
     
     private func addMonthLabels() {
         for i in 0...2 {
-            let getDate = DVCalendarAPI.getDateAfterAddNewDate(currentDay: 1, currentMonth: monthValue, currentYear: 2000, numberDayToAdd: 0, numberMonthToAdd: i-1, numberYearToAdd: 0)
+            let getDate = DVCalendarAPI.shareInstance.getDateAfterAddNewDate(currentDay: 1, currentMonth: monthValue, currentYear: 2000, numberDayToAdd: 0, numberMonthToAdd: i-1, numberYearToAdd: 0)
             let currentMonthValue = Int(getDate["Month"]!)
             addMonthLabelWithMonthValue(currentMonthValue, index: i)
         }
@@ -667,6 +693,11 @@ class CalendarTitleView: UIView {
 //---------------------------------------------------------------//
 
 class BoxDay: UIButton {
+    
+    var day: Int!
+    var month: Int!
+    var year: Int!
+    
     let lineWidth: CGFloat = 3
     var lineColor = UIColor.clearColor() {
         didSet { self.setNeedsDisplay() }
@@ -733,8 +764,15 @@ class DVCalendarSubViewData {
 //---------------------------------------------------------------//
 
 class DVCalendarAPI {
+    
+    class var shareInstance: DVCalendarAPI {
+        struct Singleton {
+            static let instance = DVCalendarAPI()
+        }
+        return Singleton.instance
+    }
 
-    static func getNumberDaysInMonthOfYear(month month: Int, year: Int) -> Int {
+    func getNumberDaysInMonthOfYear(month month: Int, year: Int) -> Int {
         if month < 1 || month > 12 || year < 0 { return 0 }
         else {
             switch month {
@@ -754,7 +792,7 @@ class DVCalendarAPI {
         }
     }
     
-    static func getDayOfWeek(day day: Int, month: Int, year: Int)->Int {
+    func getDayOfWeek(day day: Int, month: Int, year: Int)->Int {
         let today = "\(year)-\(month)-\(day)"
         let formatter  = NSDateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -768,7 +806,7 @@ class DVCalendarAPI {
         }
     }
     
-    static func getTodayDate() -> [String:Int] {
+    func getTodayDate() -> [String:Int] {
         let todayDate = NSDate()
         let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)
         let component = calendar!.components([NSCalendarUnit.Day, NSCalendarUnit.Month, NSCalendarUnit.Year], fromDate: todayDate)
@@ -779,12 +817,12 @@ class DVCalendarAPI {
         ]
     }
     
-    static func convertMonthValueToText(monthValue monthValue: Int) -> String {
+    func convertMonthValueToText(monthValue monthValue: Int) -> String {
         let monthArray = ["January","February","March","April","May","June","July","August","September","October","November","December"]
         return monthArray[monthValue-1]
     }
     
-    static func getDateAfterAddNewDate(currentDay currentDay: Int, currentMonth: Int, currentYear: Int, numberDayToAdd: Int, numberMonthToAdd: Int, numberYearToAdd: Int) -> [String:Int]! {
+    func getDateAfterAddNewDate(currentDay currentDay: Int, currentMonth: Int, currentYear: Int, numberDayToAdd: Int, numberMonthToAdd: Int, numberYearToAdd: Int) -> [String:Int]! {
         let calendar = NSCalendar.currentCalendar()
         let currentDateComponent = NSDateComponents()
         currentDateComponent.day = currentDay
@@ -807,8 +845,6 @@ class DVCalendarAPI {
     }
 
 }
-
-
 
 //---------------------------------------------------------------//
 //------------------------- EXTENSION ---------------------------//
