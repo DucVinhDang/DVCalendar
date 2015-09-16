@@ -28,6 +28,7 @@ class MainVC: UIViewController {
         super.viewDidLoad()
         
         let cal = DVCalendar(target: self, frame: CGRect(x: margin, y: margin*4, width: deviceWidth - (2*margin), height: deviceHeight/2))
+        cal.delegate = self
         cal.show()
         calendar = cal
         
@@ -56,8 +57,6 @@ class MainVC: UIViewController {
             return 0
         }
     }
-    
-
     /*
     // MARK: - Navigation
 
@@ -67,5 +66,10 @@ class MainVC: UIViewController {
         // Pass the selected object to the new view controller.
     }
     */
+}
 
+extension MainVC: DVCalendarDelegate {
+    func clickedOnDate(day: Int, month: Int, year: Int) {
+        print("\(day)-\(month)-\(year) !!!", appendNewline: true)
+    }
 }

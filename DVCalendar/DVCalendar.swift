@@ -252,7 +252,6 @@ class DVCalendar: UIViewController {
         target.addChildViewController(self)
         target.view.addSubview(view)
         self.didMoveToParentViewController(target)
-        
     }
     
     func hide() {
@@ -270,7 +269,7 @@ class DVCalendar: UIViewController {
     // MARK: - BoxDay Actions
     
     func handleClickedOnBoxDay(boxDay: BoxDay) {
-        print("\(boxDay.day)-\(boxDay.month)-\(boxDay.year)", appendNewline: true)
+        delegate?.clickedOnDate?(boxDay.day, month: boxDay.month, year: boxDay.year)
     }
 }
 
