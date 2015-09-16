@@ -55,13 +55,14 @@ class DVCalendar: UIViewController {
         setupMainView()
         setupComponentsInsideCalendarView()
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "deviceRotated", name: UIDeviceOrientationDidChangeNotification, object: nil)
+        
     }
     
     // MARK: - Loading view states
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "deviceRotated", name: UIDeviceOrientationDidChangeNotification, object: nil)
     }
     
     // MARK: - Setup views
@@ -227,7 +228,7 @@ class DVCalendar: UIViewController {
                 }
                 
                 if dayValue == Int(todayDate["Day"]!) && monthValue == Int(todayDate["Month"]!) && yearValue == Int(todayDate["Year"]!) {
-                    boxDay.lineColor = UIColor.randomColor()
+                    boxDay.lineColor = UIColor(red: 0.361, green: 0.816, blue: 0.949, alpha: 1.0)
                 }
                 
                 textDay = "\(dayValue)"
@@ -263,6 +264,14 @@ class DVCalendar: UIViewController {
     func deviceRotated() {
         if view.superview != nil {
             titleView.setNeedsDisplay()
+            
+//            for subview in mainScrollView.subviews {
+//                subview.removeFromSuperview()
+//            }
+//            
+//            mainScrollView.removeFromSuperview()
+//            mainScrollView = nil
+//            setupCalendarScrollView()
         }
     }
     
@@ -492,13 +501,17 @@ class CalendarTitleView: UIView {
     var yearTextFontSize: CGFloat!
     var dayLabelFontSize: CGFloat!
     
-    let lineWidth: CGFloat = 4
-    let lineColor = UIColor.randomColor()
+    let lineWidth: CGFloat = 6
+    let lineColor = UIColor(red: 0.604, green: 0.898, blue: 0.988, alpha: 1.0)
     
     var monthLabelArray = [UILabel]()
     weak var yearLabel: UILabel!
     let distanceBetweenMonthLabels: CGFloat = 10
     
+    let bgColor = UIColor(red: 0.361, green: 0.816, blue: 0.949, alpha: 1.0)
+    let daysColor = UIColor.whiteColor()
+    let monthColor = UIColor.whiteColor()
+    let yearColor = UIColor.whiteColor()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -524,13 +537,13 @@ class CalendarTitleView: UIView {
         
         if UIDevice.currentDevice().userInterfaceIdiom == UIUserInterfaceIdiom.Phone {
             if UIScreen.mainScreen().bounds.size.width > 320 {
-                monthTextFontSize = 17
-                yearTextFontSize = 20
-                dayLabelFontSize = 11
+                monthTextFontSize = 16
+                yearTextFontSize = 19
+                dayLabelFontSize = 13
             } else {
                 monthTextFontSize = 13
                 yearTextFontSize = 18
-                dayLabelFontSize = 10
+                dayLabelFontSize = 11
             }
         }
     }
@@ -541,7 +554,7 @@ class CalendarTitleView: UIView {
         cornerPath.closePath()
         
         let context = UIGraphicsGetCurrentContext()
-        CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
+        CGContextSetFillColorWithColor(context, bgColor.CGColor)
         CGContextFillRect(context, rect)
         
         removeAllSubViewInMainView()
@@ -559,6 +572,7 @@ class CalendarTitleView: UIView {
             let dayLabelOriginPoint = CGPoint(x: CGFloat(i) * dayLabelSize.width, y: halfHeight)
             let dayLabel = UILabel(frame: CGRect(origin: dayLabelOriginPoint, size: dayLabelSize))
             dayLabel.text = dayArray[i]
+            dayLabel.textColor = daysColor
             dayLabel.font = UIFont(name: "Helvetica", size: dayLabelFontSize)
             dayLabel.textAlignment = .Center
             self.addSubview(dayLabel)
@@ -566,8 +580,10 @@ class CalendarTitleView: UIView {
         }
         
         let linePath = UIBezierPath()
-        linePath.moveToPoint(CGPoint(x: lineWidth, y: self.bounds.height - lineWidth - lineWidth/2))
-        linePath.addLineToPoint(CGPoint(x: self.bounds.width - lineWidth, y: self.bounds.height - lineWidth - lineWidth/2))
+//        linePath.moveToPoint(CGPoint(x: lineWidth, y: self.bounds.height - lineWidth - lineWidth/2))
+//        linePath.addLineToPoint(CGPoint(x: self.bounds.width - lineWidth, y: self.bounds.height - lineWidth - lineWidth/2))
+        linePath.moveToPoint(CGPoint(x: 0, y: self.bounds.height - lineWidth/2))
+        linePath.addLineToPoint(CGPoint(x: self.bounds.width, y: self.bounds.height - lineWidth/2))
         lineColor.setStroke()
         linePath.lineWidth = lineWidth
         linePath.stroke()
@@ -579,7 +595,7 @@ class CalendarTitleView: UIView {
         let halfHeight = self.bounds.height/2
         
         let monthText: NSString = DVCalendarAPI.shareInstance.convertMonthValueToText(monthValue: value) as NSString
-        let monthTextSize: CGSize = monthText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(monthTextFontSize+1)])
+        let monthTextSize: CGSize = monthText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(monthTextFontSize+2)])
         
         var monthLabelOriginX: CGFloat = 0
         for label in monthLabelArray {
@@ -588,10 +604,12 @@ class CalendarTitleView: UIView {
         
         let monthLabel = UILabel(frame: CGRect(x: margin + monthLabelOriginX, y: margin, width: monthTextSize.width, height: halfHeight - margin))
         monthLabel.text = monthText as String
-        monthLabel.font = UIFont(name: "Helvetica", size: monthTextFontSize)
+        monthLabel.font = index == 1 ? UIFont(name: "Helvetica-Bold", size: monthTextFontSize) : UIFont(name: "Helvetica", size: monthTextFontSize)
         monthLabel.textAlignment = NSTextAlignment.Center
         
-        monthLabel.textColor = index == 1 ? UIColor.blackColor() : UIColor.lightGrayColor()
+//        monthLabel.textColor = index == 1 ? UIColor.blackColor() : UIColor.lightGrayColor()
+        monthLabel.textColor = monthColor
+        monthLabel.alpha = index == 1 ? 1.0 : 0.5
         
         self.addSubview(monthLabel)
         monthLabelArray.append(monthLabel)
@@ -613,7 +631,8 @@ class CalendarTitleView: UIView {
         
         let yearLab = UILabel(frame: CGRect(x: self.bounds.width - margin - yearTextSize.width, y: margin, width: yearTextSize.width, height: halfHeight - margin))
         yearLab.text = yearText as String
-        yearLab.font = UIFont(name: "Helvetica", size: yearTextFontSize)
+        yearLab.textColor = yearColor
+        yearLab.font = UIFont(name: "Helvetica-Bold", size: yearTextFontSize)
         yearLab.textAlignment = NSTextAlignment.Center
         self.addSubview(yearLab)
         
@@ -664,8 +683,9 @@ class CalendarTitleView: UIView {
                     subLabel.alpha = 0
                 }
                 UIView.animateWithDuration(0.3, animations: {
-                    for subLabel in self.monthLabelArray {
-                        subLabel.alpha = 1
+                    for var i=0; i<self.monthLabelArray.count; i++ {
+                        let subLabel: UILabel = self.monthLabelArray[i] as UILabel
+                        subLabel.alpha = i==1 ? 1.0 : 0.5
                     }
                 })
             })
