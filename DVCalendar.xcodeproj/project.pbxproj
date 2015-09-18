@@ -227,6 +227,7 @@
 				TargetAttributes = {
 					A3E64D721B4FCD0B00D1AC46 = {
 						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = D9553AQXR6;
 					};
 					A3E64D861B4FCD0B00D1AC46 = {
 						CreatedOnToolsVersion = 7.0;
@@ -426,6 +427,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = DVCalendar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = vn.dvisoft.DVCalendar;
@@ -437,6 +439,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = DVCalendar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = vn.dvisoft.DVCalendar;
@@ -511,6 +514,7 @@
 				A3E64D9D1B4FCD0C00D1AC46 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A3E64D9E1B4FCD0C00D1AC46 /* Build configuration list for PBXNativeTarget "DVCalendarTests" */ = {
 			isa = XCConfigurationList;
@@ -519,6 +523,7 @@
 				A3E64DA01B4FCD0C00D1AC46 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A3E64DA11B4FCD0C00D1AC46 /* Build configuration list for PBXNativeTarget "DVCalendarUITests" */ = {
 			isa = XCConfigurationList;
@@ -527,6 +532,7 @@
 				A3E64DA31B4FCD0C00D1AC46 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

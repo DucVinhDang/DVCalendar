@@ -228,7 +228,7 @@ class DVCalendar: UIViewController {
                 }
                 
                 if dayValue == Int(todayDate["Day"]!) && monthValue == Int(todayDate["Month"]!) && yearValue == Int(todayDate["Year"]!) {
-                    boxDay.lineColor = UIColor(red: 0.361, green: 0.816, blue: 0.949, alpha: 1.0)
+                    boxDay.addTodayBackground(color: UIColor(red: 0.361, green: 0.816, blue: 0.949, alpha: 1.0), subColor: UIColor(red: 0.604, green: 0.898, blue: 0.988, alpha: 1.0), bgType: .Arc)
                 }
                 
                 textDay = "\(dayValue)"
@@ -713,25 +713,80 @@ class CalendarTitleView: UIView {
 
 class BoxDay: UIButton {
     
+    enum TodayBackgroundType {
+        case Line
+        case Oval
+        case Arc
+    }
+    
     var day: Int!
     var month: Int!
     var year: Int!
+    var backgroundType: TodayBackgroundType = TodayBackgroundType.Oval
     
     let lineWidth: CGFloat = 3
-    var lineColor = UIColor.clearColor() {
-        didSet { self.setNeedsDisplay() }
-    }
+    let subLineWidth: CGFloat = 3
+    let pi: CGFloat = CGFloat(M_PI)
     
+//    var todayBgColor = UIColor(red: 0.361, green: 0.816, blue: 0.949, alpha: 1.0)
+//    var subTodayBgColor = UIColor(red: 0.604, green: 0.898, blue: 0.988, alpha: 1.0)
+    
+    var todayBgColor = UIColor.clearColor()
+    var subTodayBgColor = UIColor.clearColor()
+
     override func drawRect(rect: CGRect) {
         super.drawRect(rect)
         
-        let linePath = UIBezierPath()
-        linePath.moveToPoint(CGPoint(x: lineWidth*2, y: self.bounds.height - lineWidth - lineWidth/2))
-        linePath.addLineToPoint(CGPoint(x: self.bounds.width - lineWidth*2, y: self.bounds.height - lineWidth - lineWidth/2))
-        lineColor.setStroke()
-        linePath.lineWidth = lineWidth
-        linePath.stroke()
-        linePath.closePath()
+        if todayBgColor != UIColor.clearColor() {
+            switch backgroundType {
+            case .Line:
+                let linePath = UIBezierPath()
+                linePath.moveToPoint(CGPoint(x: lineWidth*2, y: self.bounds.height - lineWidth - lineWidth/2))
+                linePath.addLineToPoint(CGPoint(x: self.bounds.width - lineWidth*2, y: self.bounds.height - lineWidth - lineWidth/2))
+                todayBgColor.setStroke()
+                linePath.lineWidth = lineWidth
+                linePath.stroke()
+                linePath.closePath()
+
+            case .Oval:
+                let ovalRadius = min(self.bounds.width, self.bounds.height)
+                let ovalX = self.frame.width - ovalRadius < 0 ? 0 : (self.frame.width - ovalRadius)/2
+                let ovalY = self.frame.height - ovalRadius < 0 ? 0 : (self.frame.height - ovalRadius)/2
+                let ovalRect = CGRect(x: ovalX, y: ovalY, width: ovalRadius, height: ovalRadius)
+                let ovalPath = UIBezierPath(ovalInRect: ovalRect)
+                todayBgColor.setFill()
+                ovalPath.fill()
+                self.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
+
+            case .Arc:
+                let centerPoint = CGPoint(x: self.bounds.width/2, y: self.bounds.height/2)
+                let radius = min(self.bounds.width, self.bounds.height)/2 - lineWidth/2
+                
+                let startAngle: CGFloat = pi/2
+                let endAngle: CGFloat = pi/2 + (2*pi)
+                
+                let arcPath = UIBezierPath(arcCenter: centerPoint, radius: radius, startAngle: startAngle, endAngle: endAngle, clockwise: true)
+                todayBgColor.setStroke()
+                arcPath.lineWidth = lineWidth
+                arcPath.stroke()
+                arcPath.closePath()
+                
+                let subArcPath = UIBezierPath(arcCenter: centerPoint, radius: radius - lineWidth/2 - subLineWidth/2, startAngle: startAngle, endAngle: endAngle, clockwise: true)
+                subTodayBgColor.setStroke()
+                subArcPath.lineWidth = subLineWidth
+                subArcPath.stroke()
+                subArcPath.closePath()
+            }
+            
+            
+        }
+    }
+    
+    func addTodayBackground(color color: UIColor, subColor: UIColor?, bgType: TodayBackgroundType) {
+        todayBgColor = color
+        subTodayBgColor = subColor == nil ? UIColor.clearColor() : subColor!
+        backgroundType = bgType
+        self.setNeedsDisplay()
     }
 }
 
