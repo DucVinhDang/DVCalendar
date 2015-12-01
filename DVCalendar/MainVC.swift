@@ -68,8 +68,10 @@ class MainVC: UIViewController {
     */
 }
 
-extension MainVC: DVCalendarDelegate {
+extension MainVC: DVCalendarDelegate, DVAlertViewControllerDelegate {
     func clickedOnDate(day: Int, month: Int, year: Int) {
-        print("\(day)-\(month)-\(year) !!!", appendNewline: true)
+//        print("\(day)-\(month)-\(year) !!!", terminator: "\n")
+        let dvAlertView = DVAlertViewController()
+        dvAlertView.showAlertSuccess(target: self, delegate: self, title: "Thời gian hiện tại", subTitle: "\(day) - \(month) - \(year)", duration: 0.7, cancelButtonTitle: "Huỷ", otherButtonsTitles: ["Xem chi tiết", "Đặt lịch"], animate: true)
     }
 }

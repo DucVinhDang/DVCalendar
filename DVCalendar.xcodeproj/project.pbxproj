@@ -15,6 +15,7 @@
 		A3E64DA91B4FCD7800D1AC46 /* DVCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E64DA81B4FCD7800D1AC46 /* DVCalendar.swift */; };
 		A3E64DAC1B4FCD8600D1AC46 /* MainVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E64DAA1B4FCD8600D1AC46 /* MainVC.swift */; };
 		A3E64DAD1B4FCD8600D1AC46 /* MainVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3E64DAB1B4FCD8600D1AC46 /* MainVC.xib */; };
+		A3FE7E7A1C0D4C2000FF2084 /* DVAlertViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3FE7E791C0D4C2000FF2084 /* DVAlertViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		A3E64DA81B4FCD7800D1AC46 /* DVCalendar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DVCalendar.swift; sourceTree = "<group>"; };
 		A3E64DAA1B4FCD8600D1AC46 /* MainVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainVC.swift; sourceTree = "<group>"; };
 		A3E64DAB1B4FCD8600D1AC46 /* MainVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainVC.xib; sourceTree = "<group>"; };
+		A3FE7E791C0D4C2000FF2084 /* DVAlertViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DVAlertViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,6 +157,7 @@
 		A3E64DA71B4FCD6800D1AC46 /* Third Parties */ = {
 			isa = PBXGroup;
 			children = (
+				A3FE7E791C0D4C2000FF2084 /* DVAlertViewController.swift */,
 				A3E64DA81B4FCD7800D1AC46 /* DVCalendar.swift */,
 			);
 			name = "Third Parties";
@@ -294,6 +297,7 @@
 				A3E64D771B4FCD0B00D1AC46 /* AppDelegate.swift in Sources */,
 				A3E64DAC1B4FCD8600D1AC46 /* MainVC.swift in Sources */,
 				A3E64DA91B4FCD7800D1AC46 /* DVCalendar.swift in Sources */,
+				A3FE7E7A1C0D4C2000FF2084 /* DVAlertViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
